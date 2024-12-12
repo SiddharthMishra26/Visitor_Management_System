@@ -2,6 +2,7 @@ using Visitor_Management_System.Interface;
 using Visitor_Management_System.Services;
 using Visitor_Management_System.Common;
 using Visitor_Management_System.Cosmos;
+using Visitor_Management_System.ServiceFilters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,11 +15,13 @@ builder.Services.AddSingleton<ILoginService, LoginService>();
 builder.Services.AddSingleton<ICosmosDbService, CosmosDbService>();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
+// Register the service filter
+builder.Services.AddScoped<EnsurePassStatusFilter>();
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Swagger configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Visitor_Management_System.Interface;
 using Visitor_Management_System.Models;
+using Visitor_Management_System.ServiceFilters;
 
 namespace Visitor_Management_System.Controllers
 {
@@ -16,6 +17,7 @@ namespace Visitor_Management_System.Controllers
         }
 
         [HttpPost]
+        [ServiceFilter(typeof(EnsurePassStatusFilter))]
         public async Task<IActionResult> CreatePass(PassModel passModel)
         {
             var response = await _passService.CreatePass(passModel);

@@ -9,11 +9,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<IManagerService, ManagerService>();
 builder.Services.AddSingleton<ISecurityService, SecurityService>();
 builder.Services.AddSingleton<IVisitorService, VisitorService>();
+//builder.Services.AddSingleton<IPassService, VisitorService>();
 builder.Services.AddSingleton<IOfficeService, OfficeService>();
 builder.Services.AddSingleton<IPassService, PassService>();
 builder.Services.AddSingleton<ILoginService, LoginService>();
 builder.Services.AddSingleton<ICosmosDbService, CosmosDbService>();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+builder.Services.AddSingleton<ExcelService>();
+
 
 // Register the service filter
 builder.Services.AddScoped<EnsurePassStatusFilter>();

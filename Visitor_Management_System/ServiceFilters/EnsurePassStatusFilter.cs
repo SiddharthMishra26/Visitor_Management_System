@@ -26,6 +26,14 @@ namespace Visitor_Management_System.ServiceFilters
             {
                 passModel.Status = "Rejected";
             }
+            if (string.IsNullOrEmpty(passModel.Email))
+            {
+                passModel.Email = "xyz.gmail.com";
+            }
+            if (string.IsNullOrEmpty(passModel.Name))
+            {
+                passModel.Name = "xyz";
+            }
 
             // Proceed with the next filter or action
             await next();

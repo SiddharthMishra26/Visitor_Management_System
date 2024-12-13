@@ -16,13 +16,13 @@ namespace Visitor_Management_System.Controllers
             _passService = passService;
         }
 
-        [HttpPost]
-        [ServiceFilter(typeof(EnsurePassStatusFilter))]
-        public async Task<IActionResult> CreatePass(PassModel passModel)
-        {
-            var response = await _passService.CreatePass(passModel);
-            return Ok(response);
-        }
+        //[HttpPost]
+        //[ServiceFilter(typeof(EnsurePassStatusFilter))]
+        //public async Task<IActionResult> CreatePass(PassModel passModel)
+        //{
+        //    var response = await _passService.CreatePass(passModel);
+        //    return Ok(response);
+        //}
 
         [HttpPost]
         public async Task<IActionResult> GetAllPass()
@@ -39,9 +39,9 @@ namespace Visitor_Management_System.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdatePassByUId(PassModel passModel)
+        public async Task<IActionResult> UpdatePassByUId(string UId, string Status)
         {
-            var response = await _passService.UpdatePassByUId(passModel);
+            var response = await _passService.UpdatePassByUId(UId, Status);
             return Ok(response);
         }
 
@@ -66,6 +66,34 @@ namespace Visitor_Management_System.Controllers
             var pdfFilePath = await _passService.GeneratePassesByStatusPdf(status);
             var fileBytes = System.IO.File.ReadAllBytes(pdfFilePath);
             return File(fileBytes, "application/pdf", $"{status}_Passes.pdf");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GenerateAllPassesPdf()
+        {
+            var pdfFilePath = await _passService.GenerateAllPassesPdf();
+            var fileBytes = System.IO.File.ReadAllBytes(pdfFilePath);
+            return File(fileBytes, "application/pdf", $"All_Passes.pdf");
+        }
+
+
+
+
+        [HttpPost("import")]
+        public async Task<IActionResult> ImportPassFromPdf(IFormFile file)
+        {
+            // Save the uploaded PDF temporarily
+            var tempFilePath = Path.GetTempFileName();
+            using (var stream = new FileStream(tempFilePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // Call the service method to process the PDF and create a pass
+            var createdPass = await _passService.ImportPdfAndCreatePass(tempFilePath);
+
+            // Return the created pass details
+            return Ok(createdPass);
         }
 
 

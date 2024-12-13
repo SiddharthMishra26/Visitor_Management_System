@@ -4,7 +4,8 @@ using Visitor_Management_System.Entities;
 using Visitor_Management_System.Interface;
 using Visitor_Management_System.Models;
 using Visitor_Management_System.Common;
-using System.Net;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Visitor_Management_System.Services
 {
@@ -12,10 +13,14 @@ namespace Visitor_Management_System.Services
     {
         private readonly ICosmosDbService _dbService;
         private readonly IMapper _mapper;
-        public VisitorService(ICosmosDbService dbService, IMapper mapper)
+        private readonly IPassService _passService;
+        private readonly ExcelService _excelService;
+        public VisitorService(ICosmosDbService dbService, IMapper mapper, IPassService passService, ExcelService excelService)
         {
             _dbService = dbService;
             _mapper = mapper;
+            _passService = passService;
+            _excelService = excelService;
         }
 
 
@@ -60,6 +65,9 @@ namespace Visitor_Management_System.Services
                 // Add the new visitor to the database
                 var response = await _dbService.AddItemAsync(visitor);
                 var model = _mapper.Map<VisitorModel>(response);
+
+                _passService.CreatePass(model);
+                _excelService.AddVisitorToExcel(model);
                 return model;
             }
         }
@@ -78,37 +86,41 @@ namespace Visitor_Management_System.Services
             return response;
         }
 
-        //public async Task<VisitorModel> UpdateVisitorByUId(VisitorModel visitorModel)
-        //{
-        //    var existingVisitor = await _dbService.GetVisitorByUId(visitorModel.UId);
-        //    existingVisitor.Active = false;
-        //    existingVisitor.Archived = true;
-        //    await _dbService.ReplaceAsync(existingVisitor);
-
-        //    var updatedVisitor = _mapper.Map<VisitorEntity>(visitorModel);
-        //    updatedVisitor.Initialize(false, Credential.visitorDocumentType, "Mukesh", "Ambani");
-        //    var response = await _dbService.AddItemAsync(updatedVisitor);
-        //    var model = _mapper.Map<VisitorModel>(response);
-        //    return model;
-        //}
         public async Task<VisitorModel> UpdateVisitorByUId(VisitorModel visitorModel)
         {
-            var existingVisitor = await _dbService.GetVisitorByUId(visitorModel.UId);
-            var updatedVisitor = _mapper.Map(visitorModel, existingVisitor);
-            updatedVisitor.Active = false;
-            updatedVisitor.Archived = true;
+            var existingVisitor = new VisitorEntity();
+            existingVisitor = await _dbService.GetVisitorByUId(visitorModel.UId);
+
+            existingVisitor.Active = false;
+            existingVisitor.Archived = true;
             await _dbService.ReplaceAsync(existingVisitor);
+
+            _mapper.Map(visitorModel, existingVisitor);
 
             existingVisitor.Initialize(false, Credential.visitorDocumentType, "Mukesh", "Ambani");
             var response = await _dbService.AddItemAsync(existingVisitor);
             var model = _mapper.Map<VisitorModel>(response);
             return model;
         }
+        //public async Task<VisitorModel> UpdateVisitorByUId(VisitorModel visitorModel)
+        //{
+        //    var existingVisitor = await _dbService.GetVisitorByUId(visitorModel.UId);
+        //    var updatedVisitor = _mapper.Map(visitorModel, existingVisitor);
+        //    updatedVisitor.Active = false;
+        //    updatedVisitor.Archived = true;
+        //    await _dbService.ReplaceAsync(existingVisitor);
+
+        //    existingVisitor.Initialize(false, Credential.visitorDocumentType, "Mukesh", "Ambani");
+        //    var response = await _dbService.AddItemAsync(existingVisitor);
+        //    var model = _mapper.Map<VisitorModel>(response);
+        //    _excelService.AddVisitorToExcel(model);
+        //    return model;
+        //}
 
         public async Task<string> DeleteVisitorByUId(string UId)
         {
             var visitor = await _dbService.GetVisitorByUId(UId);
-            //candidate.Active = false;
+            visitor.Active = false;
             visitor.Archived = true;
             await _dbService.ReplaceAsync(visitor);
             visitor.Initialize(false, Credential.visitorDocumentType, "Mukesh", "Ambani");
@@ -126,5 +138,8 @@ namespace Visitor_Management_System.Services
         //    await _dbService.ReplaceAsync(visitor);
         //    return "Visitor Deleted";
         //}
+
+
+
     }
 }

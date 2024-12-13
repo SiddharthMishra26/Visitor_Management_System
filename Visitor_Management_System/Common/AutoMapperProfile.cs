@@ -13,6 +13,7 @@ namespace Visitor_Management_System.Common
             CreateMap<SecurityEntity, SecurityModel>().ReverseMap();
             CreateMap<PassEntity, PassModel>().ReverseMap();
             CreateMap<LoginEntity, LoginModel>().ReverseMap();
+            CreateMap<PassEntity, VisitorModel>().ReverseMap();
         }
     }
 }
